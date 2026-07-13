@@ -55,8 +55,10 @@ public class ZoneController : MonoBehaviour
         SetZone(center, widthDegrees);
     }
 
+    // Here i need to add the width of the small cap end to the width of the ring,
     public bool IsAngleInZone(float angle)
     {
+        Debug.Log("Angle is : " + angle);
         float diff = Mathf.Abs(Mathf.DeltaAngle(angle, ZoneCenter));
         return diff <= ZoneWidth / 2f;
     }

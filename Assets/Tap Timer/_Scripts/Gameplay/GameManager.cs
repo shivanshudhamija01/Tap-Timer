@@ -21,8 +21,11 @@ public class GameManager : MonoBehaviour
     private void OnEnable() => input.OnTap += HandleTap;
     private void OnDisable() => input.OnTap -= HandleTap;
 
+    // Instead of start, i have to call this start game method on screen tap , 
+    // Where it was written that tap to start the game , then game will be started
     private void Start()
     {
+        needle.ResetAngle(0f);
         StartGame();
     }
     public void StartGame()
@@ -36,7 +39,7 @@ public class GameManager : MonoBehaviour
 
     private void StartRound()
     {
-        needle.ResetAngle(0f);
+        // needle.ResetAngle(0f);
         needle.Speed = difficulty.GetSpeedForRound(round);
         zone.RandomizeZone(difficulty.GetZoneWidthForRound(round));
         needle.SetRunning(true);
