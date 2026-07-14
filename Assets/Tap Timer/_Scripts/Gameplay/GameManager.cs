@@ -1,22 +1,24 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum GameState { Idle, Playing, GameOver }
 public enum GamePhase { SingleRing, MultiRing, Chaos }
 
 /// <summary>
-/// Orchestrates the layered ring gameplay: spawns rings 1-3 in sequence,
-/// switches earlier rings into Dynamic (revolve + color-flip) mode once a
-/// second ring spawns, and drives the endless "chaos" reshuffle loop once
-/// all 3 rings have reached minimum width.
+/// Orchestrates the layered ring gameplay: spawns rings 1-3 in sequence
+/// (each new ring placed in the largest currently-uncovered gap), switches
+/// earlier rings into Dynamic (revolve + color-flip) mode once a second ring
+/// spawns, and enables continuous grow/shrink pulsing on all rings once all
+/// 3 have been fully shrunk to minimum at least once.
 /// </summary>
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private NeedleController needle;
-    [SerializeField] private RingController[] rings = new RingController[3]; // assign 3 in Inspector, outer to inner
+    [SerializeField] private RingController[] rings = new RingController[3]; // index order = spawn/sibling order
     [SerializeField] private TapInputHandler input;
     [SerializeField] private DifficultyConfig difficulty;
     [SerializeField] private float edgeForgivenessDegrees = 2f;
+
+    private const int GapSamples = 360; // 1-degree resolution for empty-space scan
 
     public GameState CurrentState { get; private set; } = GameState.Idle;
     public GamePhase CurrentPhase { get; private set; } = GamePhase.SingleRing;
@@ -43,8 +45,8 @@ public class GameManager : MonoBehaviour
         needle.SetRunning(true);
 
         foreach (var r in rings) r.Deactivate();
-        activeRingCount = 1;
-        rings[0].Activate();
+        activeRingCount = 0;
+        ActivateNextRing();
 
         GameEvents.RoundStart(1);
     }
@@ -81,7 +83,7 @@ public class GameManager : MonoBehaviour
         topmostHit.RegisterHit();
         totalHits++;
         score += 10;
-
+        Debug.Log("Score is : " + score);
         GameEvents.Hit(score);
         needle.Speed = difficulty.GetSpeedForRound(totalHits + 1);
 
@@ -90,19 +92,14 @@ public class GameManager : MonoBehaviour
 
     private void HandleRingProgression()
     {
-        if (CurrentPhase == GamePhase.Chaos)
-        {
-            if (AllActiveRingsAtMin()) ReshuffleChaos();
-            return;
-        }
+        if (CurrentPhase == GamePhase.Chaos) return; // pulsing is continuous and self-managed now
 
         var currentRing = rings[activeRingCount - 1];
         if (!currentRing.AtMinWidth) return;
 
         if (activeRingCount < 3)
         {
-            activeRingCount++;
-            rings[activeRingCount - 1].Activate();
+            ActivateNextRing();
 
             for (int i = 0; i < activeRingCount; i++)
                 rings[i].SwitchToDynamic();
@@ -112,34 +109,59 @@ public class GameManager : MonoBehaviour
         else
         {
             CurrentPhase = GamePhase.Chaos;
-            ReshuffleChaos();
+            foreach (var ring in rings) ring.EnablePulse();
         }
     }
 
-    private bool AllActiveRingsAtMin()
+    private void ActivateNextRing()
     {
-        for (int i = 0; i < activeRingCount; i++)
-            if (!rings[i].AtMinWidth) return false;
-        return true;
+        float spawnAngle = FindEmptySpotAngle();
+        activeRingCount++;
+        rings[activeRingCount - 1].Activate(spawnAngle);
     }
 
-    private void ReshuffleChaos()
+    // Scans the circle at 1-degree resolution, finds the largest arc not
+    // currently covered by any active ring's zone, and returns its midpoint.
+    private float FindEmptySpotAngle()
     {
-        int redCount = Random.Range(0, activeRingCount + 1); // 0..activeRingCount reds, inclusive
+        if (activeRingCount == 0) return 0f;
 
-        var indices = new List<int>();
-        for (int i = 0; i < activeRingCount; i++) indices.Add(i);
-        for (int i = indices.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            (indices[i], indices[j]) = (indices[j], indices[i]);
-        }
-
+        bool[] covered = new bool[GapSamples];
         for (int i = 0; i < activeRingCount; i++)
         {
-            bool forceRed = indices.IndexOf(i) < redCount;
-            rings[i].ReshuffleRandom(forceRed);
+            var ring = rings[i];
+            float half = ring.CurrentWidth / 2f;
+            for (int a = 0; a < GapSamples; a++)
+            {
+                if (Mathf.Abs(Mathf.DeltaAngle(a, ring.ZoneCenter)) <= half)
+                    covered[a] = true;
+            }
         }
+
+        int bestStart = 0, bestLen = 0, curStart = -1, curLen = 0;
+        for (int a = 0; a < GapSamples * 2; a++)
+        {
+            int idx = a % GapSamples;
+            if (!covered[idx])
+            {
+                if (curStart == -1) curStart = idx;
+                curLen++;
+                if (curLen > bestLen)
+                {
+                    bestLen = curLen;
+                    bestStart = curStart;
+                }
+            }
+            else
+            {
+                curStart = -1;
+                curLen = 0;
+            }
+            if (bestLen >= GapSamples) break; // fully uncovered circle, no need to keep scanning
+        }
+
+        if (bestLen == 0) return Random.Range(0f, 360f); // fully covered fallback
+        return (bestStart + bestLen / 2f) % GapSamples;
     }
 
     private void EndGame()

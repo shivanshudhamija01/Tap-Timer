@@ -2,15 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public enum RingColorState { Green, Red }
-
-// Static: fixed center, always green, re-randomizes per hit (phase 1 behavior).
-// Dynamic: continuously revolves and flips color at random intervals (phase 2+).
 public enum RingMode { Static, Dynamic }
-
-/// <summary>
-/// One shrinking/revolving target ring. Multiple instances (up to 3) are
-/// orchestrated by GameManager to build the layered ring gameplay.
-/// </summary>
+public enum PulseState { Idle, Cooldown, Growing, Shrinking }
 public class RingController : MonoBehaviour
 {
     [Header("Visuals")]
@@ -31,6 +24,12 @@ public class RingController : MonoBehaviour
     [SerializeField] private float colorFlipIntervalMin = 1.2f;
     [SerializeField] private float colorFlipIntervalMax = 3f;
 
+    [Header("Chaos pulse tuning")]
+    [SerializeField] private float pulseGrowSpeed = 25f;   // deg/sec
+    [SerializeField] private float pulseShrinkSpeed = 20f; // deg/sec
+    [SerializeField] private float pulseCooldownMin = 0.5f;
+    [SerializeField] private float pulseCooldownMax = 2f;
+
     private static readonly Color GreenColor = new Color(0.11f, 0.62f, 0.46f);
     private static readonly Color RedColor = new Color(0.85f, 0.24f, 0.18f);
 
@@ -44,14 +43,21 @@ public class RingController : MonoBehaviour
     private float revolveSpeed;
     private float colorFlipTimer;
 
-    public void Activate()
+    private bool pulseEnabled;
+    private PulseState pulseState = PulseState.Idle;
+    private float pulseCooldownTimer;
+    private float pulseTargetWidth;
+
+    public void Activate(float centerDegrees)
     {
         IsActive = true;
         gameObject.SetActive(true);
         Mode = RingMode.Static;
         Color = RingColorState.Green;
         CurrentWidth = maxWidth;
-        SetZone(Random.Range(0f, 360f), CurrentWidth);
+        pulseEnabled = false;
+        pulseState = PulseState.Idle;
+        SetZone(centerDegrees, CurrentWidth);
         ApplyColor();
     }
 
@@ -68,6 +74,12 @@ public class RingController : MonoBehaviour
         colorFlipTimer = Random.Range(colorFlipIntervalMin, colorFlipIntervalMax);
     }
 
+    public void EnablePulse()
+    {
+        pulseEnabled = true;
+        pulseState = PulseState.Idle; // will move to Cooldown next frame since already at min width
+    }
+
     public void RegisterHit()
     {
         CurrentWidth = Mathf.Max(minWidth, CurrentWidth - widthShrinkPerHit);
@@ -76,15 +88,9 @@ public class RingController : MonoBehaviour
             SetZone(Random.Range(0f, 360f), CurrentWidth); // re-randomize center each hit, phase 1 only
         else
             SetZone(ZoneCenter, CurrentWidth); // keep current center, revolve handles movement
-    }
 
-    public void ReshuffleRandom(bool forceRed)
-    {
-        CurrentWidth = Random.Range(minWidth, maxWidth);
-        SetZone(Random.Range(0f, 360f), CurrentWidth);
-        Color = forceRed ? RingColorState.Red : RingColorState.Green;
-        ApplyColor();
-        colorFlipTimer = Random.Range(colorFlipIntervalMin, colorFlipIntervalMax);
+        if (pulseEnabled && AtMinWidth)
+            pulseState = PulseState.Idle; // let the pulse cycle restart cleanly
     }
 
     public bool IsAngleInZone(float angle, float forgivenessDegrees)
@@ -95,18 +101,67 @@ public class RingController : MonoBehaviour
 
     private void Update()
     {
-        if (!IsActive || Mode != RingMode.Dynamic) return;
+        if (!IsActive) return;
 
-        ZoneCenter = (ZoneCenter + revolveSpeed * Time.deltaTime + 360f) % 360f;
-        SetZone(ZoneCenter, CurrentWidth);
+        bool dirty = false;
 
-        colorFlipTimer -= Time.deltaTime;
-        if (colorFlipTimer <= 0f)
+        if (Mode == RingMode.Dynamic)
         {
-            Color = Color == RingColorState.Green ? RingColorState.Red : RingColorState.Green;
-            ApplyColor();
-            colorFlipTimer = Random.Range(colorFlipIntervalMin, colorFlipIntervalMax);
+            ZoneCenter = (ZoneCenter + revolveSpeed * Time.deltaTime + 360f) % 360f;
+            dirty = true;
+
+            colorFlipTimer -= Time.deltaTime;
+            if (colorFlipTimer <= 0f)
+            {
+                Color = Color == RingColorState.Green ? RingColorState.Red : RingColorState.Green;
+                ApplyColor();
+                colorFlipTimer = Random.Range(colorFlipIntervalMin, colorFlipIntervalMax);
+            }
         }
+
+        if (pulseEnabled)
+        {
+            dirty |= UpdatePulse();
+        }
+
+        if (dirty)
+        {
+            SetZone(ZoneCenter, CurrentWidth);
+        }
+    }
+
+    private bool UpdatePulse()
+    {
+        switch (pulseState)
+        {
+            case PulseState.Idle:
+                if (AtMinWidth)
+                {
+                    pulseState = PulseState.Cooldown;
+                    pulseCooldownTimer = Random.Range(pulseCooldownMin, pulseCooldownMax);
+                }
+                return false;
+
+            case PulseState.Cooldown:
+                pulseCooldownTimer -= Time.deltaTime;
+                if (pulseCooldownTimer <= 0f)
+                {
+                    pulseTargetWidth = Random.Range(minWidth + 20f, maxWidth);
+                    pulseState = PulseState.Growing;
+                }
+                return false;
+
+            case PulseState.Growing:
+                CurrentWidth = Mathf.Min(pulseTargetWidth, CurrentWidth + pulseGrowSpeed * Time.deltaTime);
+                if (CurrentWidth >= pulseTargetWidth - 0.01f) pulseState = PulseState.Shrinking;
+                return true;
+
+            case PulseState.Shrinking:
+                CurrentWidth = Mathf.Max(minWidth, CurrentWidth - pulseShrinkSpeed * Time.deltaTime);
+                if (AtMinWidth) pulseState = PulseState.Idle;
+                return true;
+        }
+        return false;
     }
 
     private void ApplyColor()
@@ -133,7 +188,6 @@ public class RingController : MonoBehaviour
     //     if (capStart == null || capEnd == null) return;
     //     capStart.anchoredPosition = AngleToPoint(startAngle);
     //     capEnd.anchoredPosition = AngleToPoint(endAngle);
-
     // }
     private void SetZone(float centerDegrees, float widthDegrees)
     {
