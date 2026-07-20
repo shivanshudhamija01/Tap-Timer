@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public enum GameState { Idle, Playing, GameOver }
@@ -17,6 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TapInputHandler input;
     [SerializeField] private DifficultyConfig difficulty;
     [SerializeField] private float edgeForgivenessDegrees = 2f;
+    [SerializeField] private TextMeshProUGUI scoreText;
 
     private const int GapSamples = 360; // 1-degree resolution for empty-space scan
 
@@ -27,11 +29,22 @@ public class GameManager : MonoBehaviour
     private int totalHits;
     private int score;
 
-    private void OnEnable() => input.OnTap += HandleTap;
-    private void OnDisable() => input.OnTap -= HandleTap;
-
+    void Awake()
+    {
+        scoreText.text = "0";
+    }
+    private void OnEnable()
+    {
+        input.OnTap += HandleTap;
+        GameEvents.OnGameStart += StartGame;
+    }
+    private void OnDisable()
+    {
+        input.OnTap -= HandleTap;
+        GameEvents.OnGameStart -= StartGame;
+    }
     // TEMP: auto-start for testing. Remove once a Play button calls StartGame() instead.
-    private void Start() => StartGame();
+    // private void Start() => StartGame();
 
     public void StartGame()
     {
@@ -84,6 +97,7 @@ public class GameManager : MonoBehaviour
         totalHits++;
         score += 10;
         Debug.Log("Score is : " + score);
+        scoreText.text = score.ToString();
         GameEvents.Hit(score);
         needle.Speed = difficulty.GetSpeedForRound(totalHits + 1);
 

@@ -10,7 +10,7 @@ public static class GameEvents
     public static event Action<int> OnHit;              // new score
     public static event Action OnMiss;
     public static event Action<int, int> OnGameOver;     // finalScore, bestStreak/round reached
-
+    public static Action OnGameStart;
     public static void RoundStart(int round) => OnRoundStart?.Invoke(round);
     public static void Hit(int newScore) => OnHit?.Invoke(newScore);
     public static void Miss() => OnMiss?.Invoke();
