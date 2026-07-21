@@ -1,7 +1,6 @@
-using TMPro;
 using UnityEngine;
 
-public enum GameState { Idle, Playing, GameOver }
+public enum GameState { Idle, Playing, Paused, GameOver }
 public enum GamePhase { SingleRing, MultiRing, Chaos }
 
 /// <summary>
@@ -18,9 +17,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TapInputHandler input;
     [SerializeField] private DifficultyConfig difficulty;
     [SerializeField] private float edgeForgivenessDegrees = 2f;
-    [SerializeField] private TextMeshProUGUI scoreText;
 
     private const int GapSamples = 360; // 1-degree resolution for empty-space scan
+    private const string BestScoreKey = "TapTimer_BestScore";
+
+    public int BestScore { get; private set; }
 
     public GameState CurrentState { get; private set; } = GameState.Idle;
     public GamePhase CurrentPhase { get; private set; } = GamePhase.SingleRing;
@@ -29,23 +30,32 @@ public class GameManager : MonoBehaviour
     private int totalHits;
     private int score;
 
-    void Awake()
-    {
-        scoreText.text = "0";
-    }
+    // Here are all the methods that are for the game restart and resume and pause
     private void OnEnable()
     {
+        GameEvents.OnGameStarted += OnGameStart;
+        GameEvents.OnGameRestart += RestartGame;
+        GameEvents.OnPause += PauseGame;
+        GameEvents.OnResume += ResumeGame;
         input.OnTap += HandleTap;
-        GameEvents.OnGameStart += StartGame;
     }
     private void OnDisable()
     {
+        GameEvents.OnGameStarted -= OnGameStart;
+        GameEvents.OnGameRestart -= RestartGame;
+        GameEvents.OnPause -= PauseGame;
+        GameEvents.OnResume -= ResumeGame;
         input.OnTap -= HandleTap;
-        GameEvents.OnGameStart -= StartGame;
     }
+
+    private void Awake() => BestScore = PlayerPrefs.GetInt(BestScoreKey, 0);
+
     // TEMP: auto-start for testing. Remove once a Play button calls StartGame() instead.
     // private void Start() => StartGame();
-
+    private void OnGameStart()
+    {
+        StartGame();
+    }
     public void StartGame()
     {
         totalHits = 0;
@@ -96,8 +106,7 @@ public class GameManager : MonoBehaviour
         topmostHit.RegisterHit();
         totalHits++;
         score += 10;
-        Debug.Log("Score is : " + score);
-        scoreText.text = score.ToString();
+
         GameEvents.Hit(score);
         needle.Speed = difficulty.GetSpeedForRound(totalHits + 1);
 
@@ -178,11 +187,47 @@ public class GameManager : MonoBehaviour
         return (bestStart + bestLen / 2f) % GapSamples;
     }
 
+    public void PauseGame()
+    {
+        if (CurrentState != GameState.Playing) return;
+
+        CurrentState = GameState.Paused;
+        needle.SetRunning(false);
+        for (int i = 0; i < activeRingCount; i++) rings[i].SetPaused(true);
+
+        GameEvents.Pause();
+    }
+
+    public void ResumeGame()
+    {
+        if (CurrentState != GameState.Paused) return;
+
+        CurrentState = GameState.Playing;
+        needle.SetRunning(true);
+        for (int i = 0; i < activeRingCount; i++) rings[i].SetPaused(false);
+
+        GameEvents.Resume();
+    }
+
+    public void RestartGame() => StartGame(); // resets and unpauses everything
+
     private void EndGame()
     {
         CurrentState = GameState.GameOver;
         needle.SetRunning(false);
+
+        // Freeze every active ring in place (stop revolve, color flip, and pulse).
+        for (int i = 0; i < activeRingCount; i++) rings[i].SetPaused(true);
+
+        bool isNewBest = score > BestScore;
+        if (isNewBest)
+        {
+            BestScore = score;
+            PlayerPrefs.SetInt(BestScoreKey, BestScore);
+            PlayerPrefs.Save();
+        }
+
         GameEvents.Miss();
-        GameEvents.GameOver(score, totalHits);
+        GameEvents.GameOver(score, BestScore);
     }
 }

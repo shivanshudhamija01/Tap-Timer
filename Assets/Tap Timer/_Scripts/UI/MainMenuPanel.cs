@@ -16,7 +16,7 @@ public class MainMenuPanel : MonoBehaviour
 
     void OnPlayButtonClicked()
     {
-        GameEvents.OnGameStart?.Invoke();
+        GameEvents.OnPlayPressed();
         gameObject.SetActive(false);
     }
     void OnMusicButtonClicked()
