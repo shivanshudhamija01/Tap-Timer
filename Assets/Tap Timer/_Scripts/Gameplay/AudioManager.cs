@@ -1,11 +1,4 @@
 using UnityEngine;
-
-/// <summary>
-/// Two-source audio setup: one looping AudioSource for background music,
-/// one for one-shot SFX. Subscribes to GameEvents for gameplay sounds so it
-/// stays decoupled from GameManager. UI buttons call PlayButtonClickSfx()
-/// directly from their OnClick() since they aren't part of GameEvents.
-/// </summary>
 public class AudioManager : MonoBehaviour
 {
     [Header("Audio Sources")]
