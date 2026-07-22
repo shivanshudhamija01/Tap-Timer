@@ -32,7 +32,7 @@ public class AudioManager : MonoBehaviour
 
     private void HandleRoundStart(RoundStartedEvent e)
     {
-        if (e.Round == 1) PlayBgm(); // fires once per StartGame(), restarts BGM from the top each run
+        if (e.Round == 1) PlayBgm();
     }
 
     private void HandleHit(HitEvent e) => PlaySfx(correctTapClip);

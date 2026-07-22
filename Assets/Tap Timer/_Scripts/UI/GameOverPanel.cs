@@ -17,20 +17,13 @@ public class GameOverPanel : MonoBehaviour
     }
     private void OnEnable()
     {
-        // GameEvents.OnGameOver += UpdateScore;
         EventBus<GameOverEvent>.Subscribe(UpdateScore);
 
     }
     private void OnDisable()
     {
-        // GameEvents.OnGameOver -= UpdateScore;
         EventBus<GameOverEvent>.Unsubscribe(UpdateScore);
     }
-    // void UpdateScore(int score, int bestScore)
-    // {
-    //     scoreText.text = score.ToString();
-    //     bestScoreText.text = bestScore.ToString();
-    // }
     void UpdateScore(GameOverEvent e)
     {
         scoreText.text = e.FinalScore.ToString();

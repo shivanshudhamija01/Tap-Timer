@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Rotates a UI needle (RectTransform) around the dial center at a given speed.
-/// Angle convention: 0 = up (12 o'clock), increases clockwise, wraps 0-360.
-/// </summary>
 public class NeedleController : MonoBehaviour
 {
     [SerializeField] private RectTransform needleRect;

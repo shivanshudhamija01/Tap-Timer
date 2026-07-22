@@ -15,13 +15,11 @@ public class GamePausePanel : MonoBehaviour
     }
     void ResumeGame()
     {
-        // GameEvents.Resume();
         EventBus<ButtonClicked>.Raise(new ButtonClicked());
         EventBus<ResumeRequestedEvent>.Raise(new ResumeRequestedEvent());
     }
     void RestartGame()
     {
-        // GameEvents.Restart();
         EventBus<ButtonClicked>.Raise(new ButtonClicked());
         EventBus<RestartRequestedEvent>.Raise(new RestartRequestedEvent());
     }

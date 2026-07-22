@@ -1,11 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Owns panel visibility only. Subscribes to notification events via the
-/// generic EventBus. RoundStartedEvent covers both a fresh start and a
-/// restart (both flow through GameManager.StartGame()), so there's a single
-/// handler for both instead of separate GameStarted/GameRestart handlers.
-/// </summary>
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;

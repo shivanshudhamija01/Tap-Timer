@@ -1,23 +1,14 @@
 
-
 using UnityEngine;
 using UnityEngine.UI;
 
 public enum RingColorState { Green, Red }
 
-// Static: fixed center, always green, re-randomizes per hit (phase 1 behavior).
-// Dynamic: continuously revolves and flips color at random intervals (phase 2+).
 public enum RingMode { Static, Dynamic }
 
-// Only relevant once EnablePulse() is called (chaos phase). Idle -> Cooldown ->
-// Growing -> Shrinking -> Idle, looping forever. A successful tap can interrupt
-// growth/shrink at any time via RegisterHit, same as normal gameplay.
+
 public enum PulseState { Idle, Cooldown, Growing, Shrinking }
 
-/// <summary>
-/// One shrinking/revolving target ring. Multiple instances (up to 3) are
-/// orchestrated by GameManager to build the layered ring gameplay.
-/// </summary>
 public class RingController : MonoBehaviour
 {
     [Header("Visuals")]

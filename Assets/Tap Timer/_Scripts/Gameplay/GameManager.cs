@@ -2,12 +2,6 @@ using UnityEngine;
 
 public enum GameState { Idle, Playing, Paused, GameOver }
 
-/// <summary>
-/// Thin conductor: owns game state transitions. Subscribes to request events
-/// (raised by UI buttons/panels) and raises notification events (consumed by
-/// UIManager, AudioManager, etc.) via the generic EventBus instead of the old
-/// static GameEvents bus or ScriptableObject channels.
-/// </summary>
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private NeedleController needle;

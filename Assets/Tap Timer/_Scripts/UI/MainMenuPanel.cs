@@ -33,8 +33,6 @@ public class MainMenuPanel : MonoBehaviour
 
     private void OnPlayButtonClicked()
     {
-        // Panel visibility is owned entirely by UIManager (which reacts to
-        // this same event) — no need to also SetActive(false) here.
         EventBus<ButtonClicked>.Raise(new ButtonClicked());
         EventBus<PlayRequestedEvent>.Raise(new PlayRequestedEvent());
     }

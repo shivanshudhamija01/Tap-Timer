@@ -2,13 +2,6 @@ using UnityEngine;
 
 public enum GamePhase { SingleRing, MultiRing, Chaos }
 
-/// <summary>
-/// Owns the ring array and everything about spawning/progression: placing a
-/// new ring in the largest empty gap, switching rings into Dynamic mode, and
-/// entering the Chaos phase once all 3 rings have reached minimum width.
-/// GameManager no longer knows any of these details — it just calls
-/// ResetAndActivateFirst() and HandleRingProgression() after a hit.
-/// </summary>
 public class RingSpawnController : MonoBehaviour
 {
     [SerializeField] private RingController[] rings = new RingController[3]; // index order = spawn/sibling order

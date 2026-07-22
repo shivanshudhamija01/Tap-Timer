@@ -1,10 +1,4 @@
 using UnityEngine;
-
-/// <summary>
-/// Pure scoring + best-score persistence, decoupled from GameManager.
-/// Not a MonoBehaviour — instantiate it directly (e.g. `new ScoreService()`),
-/// which makes it trivial to unit test without a scene.
-/// </summary>
 public class ScoreService
 {
     private const string BestScoreKey = "TapTimer_BestScore";
