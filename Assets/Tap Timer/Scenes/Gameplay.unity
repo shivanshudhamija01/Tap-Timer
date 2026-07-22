@@ -1172,7 +1172,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 506953565}
   - {fileID: 531956861}
   - {fileID: 194684872}
   - {fileID: 526957308}
@@ -2064,81 +2063,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -0.137}
---- !u!1 &506953564
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 506953565}
-  - component: {fileID: 506953567}
-  - component: {fileID: 506953566}
-  m_Layer: 5
-  m_Name: Visuals
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &506953565
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 506953564}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 244580195}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &506953566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 506953564}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f867826b21b9d4aa5ad772e147e494a6, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &506953567
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 506953564}
-  m_CullTransparentMesh: 1
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2310,7 +2234,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -144.3, y: -20}
+  m_AnchoredPosition: {x: -100, y: -20}
   m_SizeDelta: {x: 407.4508, y: 237.9122}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &526957309
@@ -3980,10 +3904,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   needle: {fileID: 69968109}
-  rings:
-  - {fileID: 2129053604}
-  - {fileID: 1614436619}
-  - {fileID: 2028535960}
+  ringSpawner: {fileID: 1878295062}
   input: {fileID: 589851801}
   difficulty: {fileID: 11400000, guid: 77b1002d840e1460485aaa72c26d0ac9, type: 2}
   edgeForgivenessDegrees: 4
@@ -4076,7 +3997,7 @@ MonoBehaviour:
   bgmClip: {fileID: 8300000, guid: 4064a7f9d133b47f2b8df0da8bc8f7cb, type: 3}
   correctTapClip: {fileID: 8300000, guid: 317ea636727ef4faba2f99f8c9fa8f40, type: 3}
   wrongTapClip: {fileID: 8300000, guid: 123dc9281df7e436b8fd0fbcf4922c1b, type: 3}
-  buttonClickClip: {fileID: 0}
+  buttonClickClip: {fileID: 8300000, guid: dbf12eaf6ff54489cad4931d1281699d, type: 3}
 --- !u!82 &1055835660
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5918,7 +5839,7 @@ MonoBehaviour:
   capEnd: {fileID: 804036634}
   ringRadius: 121
   maxWidth: 70
-  minWidth: 35
+  minWidth: 30
   widthShrinkPerHit: 6
   revolveSpeedMin: 20
   revolveSpeedMax: 50
@@ -6089,6 +6010,8 @@ MonoBehaviour:
   playButton: {fileID: 1436372497}
   musicButton: {fileID: 2043887928}
   exitButton: {fileID: 1927333792}
+  muteIcon: {fileID: 21300000, guid: 645acd89855fe4d0aa54178a08472bb8, type: 3}
+  bgmIcon: {fileID: -5667073488795530536, guid: d7361aaaf9c0f40458d9feded5e5a14e, type: 3}
   bestScoreTxt: {fileID: 657628684}
 --- !u!95 &1621177326
 Animator:
@@ -6977,6 +6900,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1837947719}
   m_CullTransparentMesh: 1
+--- !u!1 &1878295060
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1878295061}
+  - component: {fileID: 1878295062}
+  m_Layer: 0
+  m_Name: RingSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1878295061
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878295060}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1878295062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878295060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 319f3334c8c844043bbc650d1fa27c45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RingSpawnController
+  rings:
+  - {fileID: 2129053604}
+  - {fileID: 1614436619}
+  - {fileID: 2028535960}
 --- !u!1 &1881433298
 GameObject:
   m_ObjectHideFlags: 0
@@ -7619,7 +7590,7 @@ MonoBehaviour:
   capEnd: {fileID: 1939274559}
   ringRadius: 121
   maxWidth: 70
-  minWidth: 35
+  minWidth: 30
   widthShrinkPerHit: 6
   revolveSpeedMin: 20
   revolveSpeedMax: 50
@@ -7817,7 +7788,7 @@ GameObject:
   - component: {fileID: 2043887929}
   - component: {fileID: 2043887928}
   m_Layer: 5
-  m_Name: SFX
+  m_Name: BGM
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8021,7 +7992,7 @@ MonoBehaviour:
   capEnd: {fileID: 166841133}
   ringRadius: 121
   maxWidth: 70
-  minWidth: 35
+  minWidth: 30
   widthShrinkPerHit: 6
   revolveSpeedMin: 20
   revolveSpeedMax: 50
@@ -8115,6 +8086,7 @@ SceneRoots:
   - {fileID: 692655357}
   - {fileID: 496541620}
   - {fileID: 983876525}
+  - {fileID: 1878295061}
   - {fileID: 589851800}
   - {fileID: 1621177324}
   - {fileID: 87797856}

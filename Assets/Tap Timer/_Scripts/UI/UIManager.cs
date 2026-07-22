@@ -1,5 +1,11 @@
 using UnityEngine;
 
+/// <summary>
+/// Owns panel visibility only. Subscribes to notification events via the
+/// generic EventBus. RoundStartedEvent covers both a fresh start and a
+/// restart (both flow through GameManager.StartGame()), so there's a single
+/// handler for both instead of separate GameStarted/GameRestart handlers.
+/// </summary>
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;
@@ -8,7 +14,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject gamePausePanel;
     [SerializeField] private GameObject gameOverPanel;
 
-    void Awake()
+    private void Awake()
     {
         mainMenuPanel.SetActive(true);
         gamePlayPanel.SetActive(false);
@@ -17,53 +23,41 @@ public class UIManager : MonoBehaviour
         gameOverPanel.SetActive(false);
     }
 
-    // When i press the start button , then the mainMenuPanel got disabled, and instruction panel got enabled, 
-    // When i tap on the instruction panel, then start game will be called , and one more thing , 
-    // when i press the play button , then gameplay panel also got enabled , but the score and pause is still not visible
-    void OnEnable()
+    private void OnEnable()
     {
-        GameEvents.OnPlay += EnableInstruction;
-        GameEvents.OnGameStarted += StartGame;
-        GameEvents.OnPause += PauseGame;
-        GameEvents.OnResume += ResumeGame;
-        GameEvents.OnMiss += GameOver;
-        GameEvents.OnGameRestart += GameRestart;
-    }
-    void OnDisable()
-    {
-        GameEvents.OnPlay -= EnableInstruction;
-        GameEvents.OnGameStarted -= StartGame;
-        GameEvents.OnPause -= PauseGame;
-        GameEvents.OnResume -= ResumeGame;
-        GameEvents.OnMiss -= GameOver;
-        GameEvents.OnGameRestart -= GameRestart;
+        EventBus<PlayRequestedEvent>.Subscribe(HandlePlayRequested);
+        EventBus<RoundStartedEvent>.Subscribe(HandleRoundStarted);
+        EventBus<PausedEvent>.Subscribe(HandlePaused);
+        EventBus<ResumedEvent>.Subscribe(HandleResumed);
+        EventBus<MissEvent>.Subscribe(HandleMiss);
     }
 
-    void EnableInstruction()
+    private void OnDisable()
+    {
+        EventBus<PlayRequestedEvent>.Unsubscribe(HandlePlayRequested);
+        EventBus<RoundStartedEvent>.Unsubscribe(HandleRoundStarted);
+        EventBus<PausedEvent>.Unsubscribe(HandlePaused);
+        EventBus<ResumedEvent>.Unsubscribe(HandleResumed);
+        EventBus<MissEvent>.Unsubscribe(HandleMiss);
+    }
+
+    private void HandlePlayRequested(PlayRequestedEvent e)
     {
         mainMenuPanel.SetActive(false);
         instructionPanel.SetActive(true);
     }
-    void StartGame()
+
+    private void HandleRoundStarted(RoundStartedEvent e)
     {
         instructionPanel.SetActive(false);
-        gamePlayPanel.SetActive(true);
-    }
-    void PauseGame()
-    {
-        gamePausePanel.SetActive(true);
-    }
-    void ResumeGame()
-    {
-        gamePausePanel.SetActive(false);
-    }
-    void GameOver()
-    {
-        gameOverPanel.SetActive(true);
-    }
-    void GameRestart()
-    {
         gameOverPanel.SetActive(false);
         gamePausePanel.SetActive(false);
+        gamePlayPanel.SetActive(true);
     }
+
+    private void HandlePaused(PausedEvent e) => gamePausePanel.SetActive(true);
+
+    private void HandleResumed(ResumedEvent e) => gamePausePanel.SetActive(false);
+
+    private void HandleMiss(MissEvent e) => gameOverPanel.SetActive(true);
 }

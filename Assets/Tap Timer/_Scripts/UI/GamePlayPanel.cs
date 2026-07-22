@@ -12,25 +12,39 @@ public class GamePlayPanel : MonoBehaviour
     }
     void OnEnable()
     {
-        GameEvents.OnHit += UpdateScore;
-        GameEvents.OnGameRestart += ResetScore;
+        // GameEvents.OnHit += UpdateScore;
+        EventBus<HitEvent>.Subscribe(UpdateScore);
+        // GameEvents.OnGameRestart += ResetScore;
+        EventBus<RestartRequestedEvent>.Subscribe(ResetScore);
     }
     void OnDisable()
     {
-        GameEvents.OnHit -= UpdateScore;
-        GameEvents.OnGameRestart -= ResetScore;
+        // GameEvents.OnHit -= UpdateScore;
+        EventBus<HitEvent>.Unsubscribe(UpdateScore);
+        // GameEvents.OnGameRestart -= ResetScore;
+        EventBus<RestartRequestedEvent>.Unsubscribe(ResetScore);
     }
     void OnGamePause()
     {
-        GameEvents.Pause();
+        // GameEvents.Pause();
+        EventBus<ButtonClicked>.Raise(new ButtonClicked());
+        EventBus<PauseRequestedEvent>.Raise(new PauseRequestedEvent());
         Debug.Log("Game is Paused");
     }
-    void UpdateScore(int score)
+    // void UpdateScore(int score)
+    // {
+    //     scoreText.text = score.ToString();
+    // }
+    void UpdateScore(HitEvent e)
     {
-        scoreText.text = score.ToString();
+        scoreText.text = e.NewScore.ToString();
     }
-    void ResetScore()
+    void ResetScore(RestartRequestedEvent e)
     {
         scoreText.text = "0";
     }
+    // void ResetScore()
+    // {
+    //     scoreText.text = "0";
+    // }
 }

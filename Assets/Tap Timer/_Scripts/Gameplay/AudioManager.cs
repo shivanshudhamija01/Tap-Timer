@@ -1,4 +1,5 @@
 using UnityEngine;
+
 public class AudioManager : MonoBehaviour
 {
     [Header("Audio Sources")]
@@ -13,29 +14,33 @@ public class AudioManager : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.OnRoundStart += HandleRoundStart;
-        GameEvents.OnHit += HandleHit;
-        GameEvents.OnMiss += HandleMiss;
+        EventBus<RoundStartedEvent>.Subscribe(HandleRoundStart);
+        EventBus<HitEvent>.Subscribe(HandleHit);
+        EventBus<MissEvent>.Subscribe(HandleMiss);
+        EventBus<ButtonClicked>.Subscribe(PlayButtonClickSfx);
+        EventBus<OnBGMToggle>.Subscribe(SetBGMVolume);
     }
 
     private void OnDisable()
     {
-        GameEvents.OnRoundStart -= HandleRoundStart;
-        GameEvents.OnHit -= HandleHit;
-        GameEvents.OnMiss -= HandleMiss;
+        EventBus<RoundStartedEvent>.Unsubscribe(HandleRoundStart);
+        EventBus<HitEvent>.Unsubscribe(HandleHit);
+        EventBus<MissEvent>.Unsubscribe(HandleMiss);
+        EventBus<ButtonClicked>.Unsubscribe(PlayButtonClickSfx);
+        EventBus<OnBGMToggle>.Unsubscribe(SetBGMVolume);
     }
 
-    private void HandleRoundStart(int round)
+    private void HandleRoundStart(RoundStartedEvent e)
     {
-        if (round == 1) PlayBgm(); // fires once per StartGame(), restarts BGM from the top each run
+        if (e.Round == 1) PlayBgm(); // fires once per StartGame(), restarts BGM from the top each run
     }
 
-    private void HandleHit(int newScore) => PlaySfx(correctTapClip);
+    private void HandleHit(HitEvent e) => PlaySfx(correctTapClip);
 
-    private void HandleMiss() => PlaySfx(wrongTapClip);
+    private void HandleMiss(MissEvent e) => PlaySfx(wrongTapClip);
 
     // Wire this to every button's OnClick() in the Inspector (Play, Pause, Resume, Restart).
-    public void PlayButtonClickSfx() => PlaySfx(buttonClickClip);
+    public void PlayButtonClickSfx(ButtonClicked e) => PlaySfx(buttonClickClip);
 
     private void PlayBgm()
     {
@@ -43,6 +48,10 @@ public class AudioManager : MonoBehaviour
         bgmSource.clip = bgmClip;
         bgmSource.loop = true;
         bgmSource.Play();
+    }
+    private void SetBGMVolume(OnBGMToggle e)
+    {
+        bgmSource.volume = e.Volume;
     }
 
     private void PlaySfx(AudioClip clip)
